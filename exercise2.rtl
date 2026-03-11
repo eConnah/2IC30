@@ -14,5 +14,5 @@ SigmaA <- IR.val
 {IP = ip, SigmaA = ir.val}
 SigmaR <- RAM[SigmaA]
 {IP = ip, SigmaA = ir.val, SigmaR = RAM[SigmaA]}
-RA <- SigmaR
+RA, CC <- SigmaR, ALU.cc
 {IP = ip, SigmaA = ir.val, SigmaR = RAM[SigmaA], RA = RAM[IR.val}
