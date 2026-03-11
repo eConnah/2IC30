@@ -1,0 +1,18 @@
+{Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{IP = ip}
+SigmaA, IP <- IP(Bbus), IP(Abus) + 1
+{SigmaA = ip, IP = ip + 1}
+SigmaR <- RAM[SigmaA]
+{SigmaA = ip, SigmaR = RAM[ip], IP = ip + 1}
+IR <- SigmaR(Bbus)
+{SigmaA = ip, SigmaR = RAM[ip], IP = ip + 1, IR = RAM[ip]}
+
+
+{LOAD Ri [value]}
+{IP = ip}
+SigmaA <- IR.val
+{IP = ip, SigmaA = ir.val}
+SigmaR <- RAM[SigmaA]
+{IP = ip, SigmaA = ir.val, SigmaR = RAM[SigmaA]}
+RA <- SigmaR
+{IP = ip, SigmaA = ir.val, SigmaR = RAM[SigmaA], RA = RAM[IR.val}
