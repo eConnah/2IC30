@@ -1,4 +1,4 @@
-{Student1 Name: Number / Student2 : Number}
+{Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
 {IP = ip}
 SigmaA, IP <- IP(Bbus), IP(Abus) + 1
 {SigmaA = ip, IP = ip + 1}
