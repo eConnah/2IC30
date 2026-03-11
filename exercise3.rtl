@@ -1,0 +1,14 @@
+{Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{IP = ip}
+SigmaA, IP <- IP(Bbus), IP(Abus) + 1
+{SigmaA = ip, IP = ip + 1}
+SigmaR <- RAM[SigmaA]
+{SigmaA = ip, SigmaR = RAM[ip], IP = ip + 1}
+IR <- SigmaR(Bbus)
+{SigmaA = ip, SigmaR = RAM[ip], IP = ip + 1, IR = RAM[ip]}
+
+
+{BEQ disp}
+{IP = ip}
+IP, CC <- IP(Bbus) + IR.val(Abus), ALU.cc
+{IP = ip + disp, CC = ALU.cc}
