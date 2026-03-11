@@ -8,7 +8,6 @@ IR <- SigmaR(Bbus)
 {SigmaA = ip, SigmaR = RAM[ip], IP = ip + 1, IR = RAM[ip]}
 
 
-{BEQ disp}
-{IP = ip}
-IP, CC <- IP(Bbus) + IR.val(Abus), ALU.cc
-{IP = ip + disp, CC = ALU.cc}
+{BCC disp when taken}
+IP <- IP(Bbus) + IR.val(Abus)
+{IP = ip + 1 + disp}
