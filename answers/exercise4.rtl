@@ -4,13 +4,13 @@
 {IP = ip}
 SigmaA, IP <- IP(Bbus), IP(Abus) + 1
 {SigmaA = ip, IP = ip + 1}
-SigmaR, SigmaA, IP <- RAM[SigmaA], IP(Bbus), IP + 1
-{SigmaA = ip + 1, SigmaR = RAM[ip], IP = ip + 2}
+SigmaR, SigmaA <- RAM[SigmaA], IP(Bbus)
+{SigmaA = ip + 1, SigmaR = RAM[ip], IP = ip + 1}
 IR, SigmaR <- SigmaR(Bbus), RAM[SigmaA]
 {SigmaA = ip, SigmaR = RAM[ip+1], IP = ip + 1, IR = RAM[ip]}
 SigmaA <- SigmaR(Bbus)
 {SigmaA = RAM[ip+1], SigmaR = RAM[ip+1], IP = ip + 1, IR = RAM[ip]}
-SigmaR <- RAM[SigmaA]
-{SigmaA = RAM[ip+1], SigmaR = RAM[RAM[ip+1]], IP = ip + 1, IR = RAM[ip]}
+SigmaR, IP <- RAM[SigmaA], IP(Abus) + 1
+{SigmaA = RAM[ip+1], SigmaR = RAM[RAM[ip+1]], IP = ip + 2, IR = RAM[ip]}
 RA <- SigmaR
-{SigmaA = RAM[ip+1], SigmaR = RAM[RAM[ip+1]], IP = ip + 1, IR = RAM[ip], RA = RAM[RAM[ip+1]]}
+{SigmaA = RAM[ip+1], SigmaR = RAM[RAM[ip+1]], IP = ip + 2, IR = RAM[ip], RA = RAM[RAM[ip+1]]}
