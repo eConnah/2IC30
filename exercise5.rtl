@@ -1,0 +1,13 @@
+{Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{IP = ip}
+SigmaA, IP <- IP(Bbus), IP(Abus) + 1
+{SigmaA = ip, IP = ip + 1}
+SigmaR <- RAM[SigmaA]
+{SigmaA = ip, SigmaR = RAM[ip], IP = ip + 1}
+IR <- SigmaR(Bbus)
+{SigmaA = ip, SigmaR = RAM[ip], IP = ip + 1, IR = RAM[ip]}
+
+{ADD Ri value - Extended Data Path}
+{RA = RA, ir.val = ir.val, SigmaA = ip - 1, IP = ip}
+RA, CC, IR, SigmaA, IP <- RA(Bbus) + IR.val(Abus), ALU.cc, RAM[SigmaA], IP, IP+1
+{RA = RA + ir.val, CC = ALU.cc, IR = RAM[ip -1], SigmaA = ip, IP = ip +1} {IP points 2 and SigmA 1 instruction ahead}
