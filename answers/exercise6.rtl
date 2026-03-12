@@ -1,4 +1,6 @@
 {Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{Extended Architecture - Short Form - STOR Ri [value]}
+
 {IP = ip + 1, IR = RAM[ip]}
 SigmaA <- IR.val(Bbus)
 {IP = ip + 1, SigmaA = ir.val}

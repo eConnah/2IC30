@@ -1,4 +1,6 @@
 {Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{Extended Architecture - Long Form - ADD Ri value}
+
 {IP = ip + 2}
 SigmaR <- RAM[SigmaA]
-RA <- RA(Abus) + SigmaR(Bbus)
+RA, CC <- RA(Abus) + SigmaR(Bbus), ALU.cc

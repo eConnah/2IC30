@@ -1,4 +1,6 @@
 {Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{Simple Architecture - Short Form - LOAD [Ri]}
+
 {IP = ip}
 SigmaA, IP <- IP(Bbus), IP(Abus) + 1
 {SigmaA = ip, IP = ip + 1}
@@ -14,5 +16,5 @@ SigmaA <- IR.val
 {IP = ip, SigmaA = ir.val}
 SigmaR <- RAM[SigmaA]
 {IP = ip, SigmaA = ir.val, SigmaR = RAM[SigmaA]}
-RA, CC <- SigmaR, ALU.cc
+RA <- SigmaR
 {IP = ip, SigmaA = ir.val, SigmaR = RAM[SigmaA], RA = RAM[IR.val}

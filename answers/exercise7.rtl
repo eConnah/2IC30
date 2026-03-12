@@ -1,5 +1,6 @@
 {Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{Extended Architecture - Short Form - BEQ disp (not taken)}
 
 {BEQ disp (when not taken) - move to next instruction}
-IR, SigmaA, IP <- RAM[SigmaA], IP, IP +1
+IR, SigmaA, IP <- RAM[SigmaA], IP, IP + 1
 {IR = RAM[ip -1], SigmaA = ip, IP = ip +1}

@@ -1,4 +1,6 @@
 {Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{Simple Architecture - Short Form - ADD Ri Rj}
+
 {IP = ip}
 SigmaA, IP <- IP(Bbus), IP(Abus) + 1
 {SigmaA = ip, IP = ip + 1}

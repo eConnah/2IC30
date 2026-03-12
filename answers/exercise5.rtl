@@ -1,4 +1,5 @@
 {Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{Extended Architecture - Short Form - ADD Ri value}
 
 {ADD Ri value - Extended Data Path}
 {RA = RA, ir.val = ir.val, SigmaA = ip - 1, IP = ip}
