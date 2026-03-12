@@ -21,11 +21,11 @@
 
             # Define the shortcuts as functions
             rtl-s() {
-              java -jar RtlTester.jar -s "$1"
+              java -jar ../RtlTester.jar -s "$1"
             }
 
             rtl-e() {
-              java -jar RtlTester.jar -e "$1"
+              java -jar ../RtlTester.jar -e "$1"
             }
 
             # Optional: Export them so they are available in subshells
