@@ -1,0 +1,11 @@
+{Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+
+
+{STOR Ri [value]}
+{IP = ip (next instruction), SigmaA points to the long operand}
+SigmaR, SigmaW <- RAM[SigmaA], RA
+{IP = ip, SigmaA = ip -1, SigmaW = RA, SigmaR = RAM[SigmaA]}
+SigmaA <- SigmaR(Bbus)
+{IP = ip, SigmaA = SigmaR, SigmaW = RA}
+RAM[SigmaA], IR, SigmaA, IP <- SigmaW, RAM[IP], IP, IP +1
+{RAM[RAM[SigmaA]] = RA, IR = RAM[SigmaA], SigmaA = ip, IP = ip +1}
