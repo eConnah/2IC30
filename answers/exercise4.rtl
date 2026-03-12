@@ -18,4 +18,4 @@ SigmaA <- SigmaR(Bbus)
 
 SigmaR <- RAM[SigmaA]
 
-RA <- SigmaR(Cbus)
+RA <- SigmaR
