@@ -1,12 +1,8 @@
 {Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
 {Extended Architecture - Short Form - STOR Ri [value]}
 
-{IP = ip + 1, IR = RAM[ip]}
-SigmaA <- IR.val(Bbus)
-{IP = ip + 1, SigmaA = ir.val}
-SigmaR <- RAM[SigmaA]
-{SigmaR = RAM[ir.val], IR = ir + 1, SigmaA = ir.val}
-RA <- SigmaR
-{RA = RAM[ir.val], SigmaR = RAM[ir.val], IR = ir + 1, SigmaA = ir.val}
-
-
+{IP = ip + 2, SigmaA = ip + 1, IR = RAM[ip]}
+IPB, SigmaA, SigmaW <- RAM[SigmaA], IR.val(Bbus), RA(Abus)
+{IP = ip + 2, SigmaA = ir.val, IR = RAM[ip], IPB = RAM[ip + 1], SigmaW = ra}
+RAM[SigmaA], IP, SigmaA, IR <- SigmaW, IP + 1, IP, IPB
+{IP = ip + 3, SigmaA = ip + 2, IR = RAM[ip + 1], IPB = RAM[ip + 1], SigmaW = ra, RAM[ir.val] = ra}
