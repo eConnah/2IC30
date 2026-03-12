@@ -12,5 +12,5 @@ SigmaA <- SigmaR(Bbus)
 {SigmaA = RAM[ip+1], SigmaR = RAM[ip+1], IP = ip + 1, IR = RAM[ip]}
 SigmaR, IP <- RAM[SigmaA], IP(Abus) + 1
 {SigmaA = RAM[ip+1], SigmaR = RAM[RAM[ip+1]], IP = ip + 2, IR = RAM[ip]}
-RA <- SigmaR
+RA, CC <- SigmaR(Bbus), ALU.cc
 {SigmaA = RAM[ip+1], SigmaR = RAM[RAM[ip+1]], IP = ip + 2, IR = RAM[ip], RA = RAM[RAM[ip+1]]}

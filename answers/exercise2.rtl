@@ -9,12 +9,10 @@ SigmaR <- RAM[SigmaA]
 IR <- SigmaR(Bbus)
 {SigmaA = ip, SigmaR = RAM[ip], IP = ip + 1, IR = RAM[ip]}
 
-
-{LOAD Ri [value]}
 {IP = ip}
-SigmaA <- IR.val(Bbus)
-{IP = ip, SigmaA = ir.val}
+SigmaA <- RB(Bbus)
+{IP = ip, SigmaA = rb}
 SigmaR <- RAM[SigmaA]
-{IP = ip, SigmaA = ir.val, SigmaR = RAM[SigmaA]}
+{IP = ip, SigmaA = rb, SigmaR = RAM[rb]}
 RA <- SigmaR(Bbus)
-{IP = ip, SigmaA = ir.val, SigmaR = RAM[SigmaA], RA = RAM[IR.val}
+{IP = ip, SigmaA = rb, SigmaR = RAM[rb], RA = RAM[rb}
