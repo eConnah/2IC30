@@ -1,9 +1,16 @@
 {Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
 {Extended Architecture - Long Form - BNE disp (taken)}
 
-{IP = ip + 2}
-
 {NE condition met}
 
+{IP = ip + 2, SigmaA = ip + 1, IR = RAM[ip]}
 SigmaR <- RAM[SigmaA]
-IP <- IP(Abus) + SigmaR(Bbus)
+{IP = ip + 2, SigmaA = ip + 1, IR = RAM[ip], SigmaR = RAM[ip + 1]}
+IP <- IP + SigmaR(Bbus)
+{IP = ip + 2 + RAM[ip + 1], SigmaA = ip + 1, IR = RAM[ip], SigmaR = RAM[ip + 1]}
+RB <- IP - 1
+{IP = ip + 2 + RAM[ip + 1], SigmaA = ip + 1, IR = RAM[ip], SigmaR = RAM[ip + 1], RB = ip + 1 + RAM[ip + 1]}
+SigmaA <- RB(Bbus)
+{IP = ip + 2 + RAM[ip + 1], SigmaA = ip + 1 + RAM[ip + 1], IR = RAM[ip], SigmaR = RAM[ip + 1], RB = ip + 1 + RAM[ip + 1]}
+IR, SigmaA, IP <- RAM[SigmaA], IP, IP+1
+{IP = ip + 3 + RAM[ip + 1], SigmaA = ip + 2 + RAM[ip + 1], IR = RAM[ip + 1 + RAM[ip + 1]], SigmaR = RAM[ip + 1], RB = ip + 1 + RAM[ip + 1]}

@@ -4,5 +4,5 @@
 {IP = ip + 2, SigmaA = ip + 1, IR = RAM[ip]}
 IPB, SigmaA, SigmaW <- RAM[SigmaA], IR.val(Bbus), RA(Abus)
 {IP = ip + 2, SigmaA = ir.val, IR = RAM[ip], IPB = RAM[ip + 1], SigmaW = ra}
-RAM[SigmaA], IP, SigmaA, IR <- SigmaW, IP + 1, IP, IPB
+RAM[SigmaA], SigmaA, IP, IR <- SigmaW, IP, IP+1, IPB
 {IP = ip + 3, SigmaA = ip + 2, IR = RAM[ip + 1], IPB = RAM[ip + 1], SigmaW = ra, RAM[ir.val] = ra}
