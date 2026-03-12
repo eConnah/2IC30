@@ -1,11 +1,10 @@
 {Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
 {Extended Architecture - Long Form - STOR Ri [value]}
 
-{STOR Ri [value]}
-{IP = ip (next instruction), SigmaA points to the long operand}
-SigmaR, SigmaW <- RAM[SigmaA], RA
-{IP = ip, SigmaA = ip -1, SigmaW = RA, SigmaR = RAM[SigmaA]}
-SigmaA <- SigmaR(Bbus)
-{IP = ip, SigmaA = SigmaR, SigmaW = RA}
-RAM[SigmaA], IR, SigmaA, IP <- SigmaW, RAM[IP], IP, IP +1
-{RAM[RAM[SigmaA]] = RA, IR = RAM[SigmaA], SigmaA = ip, IP = ip +1}
+{IP = ip + 2, SigmaA = ip + 1, IR = RAM[ip]}
+SigmaR, SigmaW, SigmaA <- RAM[SigmaA], RA(Abus), IP
+{IP = ip + 2, SigmaA = ip + 2, IR = RAM[ip], SigmaR = RAM[ip + 1], SigmaW = ra}
+SigmaA, IPB, IP <- SigmaR(Bbus), RAM[SigmaA], IP+1
+{IP = ip + 3, SigmaA = RAM[ip + 1], IR = RAM[ip], SigmaR = RAM[ip + 1], SigmaW = ra, IPB = RAM[ip + 2]}
+RAM[SigmaA], IR, SigmaA, IP <- SigmaW, IPB(Ibus), IP, IP+1
+{IP = ip + 4, SigmaA = ip + 3, IR = RAM[ip + 2], SigmaR = RAM[ip + 1], SigmaW = ra, IPB = RAM[ip + 2], RAM[RAM[ip + 1]] = ra}
