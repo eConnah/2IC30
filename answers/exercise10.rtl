@@ -8,7 +8,7 @@ SigmaR <- RAM[SigmaA]
 {IP = ip + 2, SigmaA = ip + 1, IR = RAM[ip], SigmaR = RAM[ip + 1]}
 IP <- IP(Abus) + SigmaR(Bbus)
 {IP = ip + 2 + RAM[ip + 1], SigmaA = ip + 1, IR = RAM[ip], SigmaR = RAM[ip + 1]}
-SigmaA, IP <- IP(Bbus), IP + 1
+SigmaA, IP <- IP, IP + 1
 {IP = ip + 3 + RAM[ip + 1], SigmaA = ip + 2 + RAM[ip + 1], IR = RAM[ip], SigmaR = RAM[ip + 1]}
 IR, SigmaA, IP <- RAM[SigmaA], IP, IP+1
 {IP = ip + 4 + RAM[ip + 1], SigmaA = ip + 3 + RAM[ip + 1], IR = RAM[ip + 2 + RAM[ip + 1]], SigmaR = RAM[ip + 1]}
