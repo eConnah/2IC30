@@ -1,0 +1,4 @@
+{Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{IP = ip + 2}
+SigmaR <- RAM[SigmaA]
+RA <- RA(Abus) + SigmaR(Bbus)

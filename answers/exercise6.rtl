@@ -1,0 +1,10 @@
+{Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{IP = ip + 1, IR = RAM[ip]}
+SigmaA <- IR.val(Bbus)
+{IP = ip + 1, SigmaA = ir.val}
+SigmaR <- RAM[SigmaA]
+{SigmaR = RAM[ir.val], IR = ir + 1, SigmaA = ir.val}
+RA <- SigmaR
+{RA = RAM[ir.val], SigmaR = RAM[ir.val], IR = ir + 1, SigmaA = ir.val}
+
+

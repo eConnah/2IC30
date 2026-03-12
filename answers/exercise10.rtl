@@ -1,0 +1,7 @@
+{Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
+{IP = ip + 2}
+
+{NE condition met}
+
+SigmaR <- RAM[SigmaA]
+IP <- IP(Abus) + SigmaR(Bbus)
