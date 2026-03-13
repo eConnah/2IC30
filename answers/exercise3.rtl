@@ -11,5 +11,5 @@ IR <- SigmaR(Bbus)
 
 
 {BCC disp when taken}
-IP <- IP(Abus) + IR.val(Bbus)
+IP <- IP(Abus) + IR.compl(Bbus)
 {IP = ip + 1 + disp}
