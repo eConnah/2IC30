@@ -1,5 +1,5 @@
 {Connor Alecks: 2254441 / Lukáš Hlaváč : 2278081}
-{Simple Architecture - Short Form - LOAD [Ri]}
+{Simple Architecture - Short Form - LOAD Ri [value]}
 
 {IP = ip}
 SigmaA, IP <- IP(Bbus), IP(Abus) + 1
@@ -10,9 +10,9 @@ IR <- SigmaR(Bbus)
 {SigmaA = ip, SigmaR = RAM[ip], IP = ip + 1, IR = RAM[ip]}
 
 {IP = ip}
-SigmaA <- RB(Bbus)
-{IP = ip, SigmaA = rb}
+SigmaA <- IR.val(Bbus)
+{IP = ip, SigmaA = ir.val}
 SigmaR <- RAM[SigmaA]
-{IP = ip, SigmaA = rb, SigmaR = RAM[rb]}
+{IP = ip, SigmaA = ir.val, SigmaR = RAM[SigmaA]}
 RA <- SigmaR(Bbus)
-{IP = ip, SigmaA = rb, SigmaR = RAM[rb], RA = RAM[rb}
+{IP = ip, SigmaA = ir.val, SigmaR = RAM[SigmaA], RA = RAM[IR.val}
