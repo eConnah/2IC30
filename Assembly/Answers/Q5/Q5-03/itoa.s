@@ -31,7 +31,7 @@ exit:
 itoa:
         CMP R0, #10             @ Compare R0 to 10 (decimal)
         ADDLT R0, #48           @ Add '48' (decimal) if < 10
-        ADDGT R0, #55           @ Add 55 (decimal) if >= 10
+        ADDGE R0, #55           @ Add 55 (decimal) if >= 10
         MOV     PC, LR
 
 .data
