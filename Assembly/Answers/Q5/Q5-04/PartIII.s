@@ -62,7 +62,7 @@ MinVal:
 again:                   
         ADD R2, #1                  @ 7 - Increment counter
         CMP R2, R1                  @ 8 - Compare counter to length and if counter ...
-        BGT end                     @ 9 - IF >= length : then end function (exit loop)
+        BGE end                     @ 9 - IF >= length : then end function (exit loop)
         LDR R4,[R0],#4              @10 -    Load R4 with R0+counter*4 
         CMP R4, R3                  @11 - Compare R4 with current smallest value (R3)
         MOVLT R3, R4                @12 - IF R4 < R3 then store in R3 as minimum value
