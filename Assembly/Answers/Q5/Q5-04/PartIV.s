@@ -29,9 +29,9 @@ exit:
 MaxVal:
         STMFD SP!, {R4, LR}         @ Save R4 and LR on the stack
         MOV R2, R1                  @ 4 - Counter = array1size
-		SUB R1, #1					@ Decrease R1
-		LSL R1, R1, #2				@ Set R1 to (size-1)*4 (max size of array)
-		ADD R0, R1					@ Set R0 to last address in the array
+	SUB R1, #1		    @ Decrease R1
+	LSL R1, R1, #2		    @ Set R1 to (size-1)*4 (max size of array)
+        ADD R0, R1		    @ Set R0 to last address in the array
         LDR R3,[R0], #-4            @ Load the last element to R3
 again:                   
         SUB R2, #1                  @ 7 - Decrement counter
