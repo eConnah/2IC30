@@ -171,11 +171,10 @@ numtoasc:
 @ Returns:
 @   R0: Integer value of provided character
 atoi:
-                                    @ TASK - add the missing code
         CMP     R0, #0x40       	@ Compare with the character smaller than 'A/a'
-        SUBLT   R0, #0x30       	@ If in range 0-9, substract '0'
-        ORRGT   R0, #0x60               @ If in range A-F or a-f, force lower case ...
-        SUBGT   R0, #0x57       	@    and substract 'a'-10
+        SUBLT   R0, R0, #0x30       	@ If in range 0-9, substract '0'
+        ORRGT   R0, R0, #0x60           @ If in range A-F or a-f, force lower case ...
+        SUBGT   R0, R0, #0x57       	@ and substract 'a'-10
         MOV     PC, LR
                 
 
@@ -185,10 +184,9 @@ atoi:
 @ Returns:   
 @   R0: related ASCII character ('0'-'9', 'A'-'F')
 itoa:
-                                    @ TASK - add the missing code
-        CMP R0, #10             @ Compare R0 to 10 (decimal)
-        ADDLT R0, #48           @ Add '48' (decimal) if < 10
-        ADDGE R0, #55           @ Add 55 (decimal) if >= 10
+        CMP R0, #10                    @ Compare R0 to 10 (decimal)
+        ADDLT R0, R0, #48              @ Add '48' (decimal) if < 10
+        ADDGE R0, R0, #55              @ Add 55 (decimal) if >= 10
         MOV     PC, LR
 
 @@@@ gen_number: Generate a number based on the current time
@@ -199,7 +197,7 @@ itoa:
 gen_number:
         STMFD   SP!, {R1,R7,LR}
         LDR     R0, =time           @ TASK: Load address of time struct to R0
-        MOV     R1, #TIME_ZONE            @ TASK: Load 0 into R1 (time zone)
+        MOV     R1, #TIME_ZONE      @ TASK: Load 0 into R1 (time zone)
         MOV     R7, #SYS_GETTIME    @ TASK: Place system call number for gettimeofday in R7
         SWI     0                   @ TASK: Make the system call
         LDR     R1, =musecs         @ TASK: Load a register with address of musecs variable
