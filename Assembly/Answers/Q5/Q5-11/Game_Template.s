@@ -5,15 +5,12 @@
 @ A simple random number guessing game
 .global main
 
-.equ SYS_EXIT, 1
-.equ SYS_EXIT: 1
-.equ SYS_READ: 3
-.equ SYS_WRITE: 4
-.equ SYS_GETTIMEOFDAY: 96
-.equ SYS_TIMER_GETTIME: 224
-.equ SYS_CLOCK_GETTIME: 228
-.equ STDOUT: 1
-.equ STDIN: 0
+.equ SYS_EXIT, 0x01
+.equ SYS_READ, 0x03
+.equ SYS_WRITE, 0x04
+.equ SYS_GETTIME, 0x4E
+.equ STDOUT, 0x01
+.equ STDIN, 0x00
 
 .text
 
@@ -26,19 +23,19 @@ main:
 
         MOV   R8, R0            @ Store 'hidden' number in R8
         MOV   R9, #3            @ Initialise remaining guesses to 3
-                                @ TASK: Load new game string
-                                @ TASK: Load new game string length
+        LDR   R0, =new_game     @ TASK: Load new game string
+        MOV   R1, #new_game_len @ TASK: Load new game string length
         BL    print             @ Print the new game string
 next_guess:
-                                @ TASK: Load prompt string address
-                                @ TASK: Load prompt length
+		LDR   R0, =prompt       @ TASK: Load prompt string address
+		MOV   R1, #prompt_len   @ TASK: Load prompt length
         BL    print             @ Print the prompt
 
 @								@ TASK: Load input buffer address
 @								@ TASK: Load input buffer length
 @        BL    read				@ Read 3 chars to input buffer (including newline)
 
-		LDR   R1, =input       
+@		LDR   R1, =input          @ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
        	BL    asctonum          @ Convert string to integer.
         MOV   R1, R8            @ Copy hidden number
         MOV   R10, R0           @ Backup guessed number
@@ -70,10 +67,10 @@ exit:
 @   none
 print:                      
         STMFD   SP!, {R7,LR}    	@ Push used registers and LR on the stack;
-                                	@ TASK: Move number of characters to print(R1) to R2
-                                	@ TASK: Move address of output string(R0) to R1
-            				    	@ TASK: Put the Syscall number in R?
-                    		    	@ TASK: Put the monitor STDOUT in R?
+        MOV R2, R1                	@ TASK: Move number of characters to print(R1) to R2
+        MOV R1, R0              	@ TASK: Move address of output string(R0) to R1
+        MOV R7, #SYS_WRITE              @ TASK: Put the Syscall number in R? - R7 - SYS_WRITE
+        MOV R0, #STDOUT  		@ TASK: Put the monitor STDOUT in R? - R0 - #1
         @ SWI 0                 	@ TASK: Uncomment this line to make the syscall
         LDMFD   SP!, {R7,LR}    	@ Restore used registers (update SP with !)
         MOV     PC, LR          	@ Return
@@ -129,7 +126,7 @@ readall:
 @ Returns:
 @   none
 numtoasc: 
-        STMFD   SP!, {R4, LR}   	@ TASK: Explain why this push occurs
+        STMFD   SP!, {R4, LR}   	@ TASK: Explain why this push occurs  @ Puts a copy of R4 to the stack
         MOV     R4, R0          	@ copy number
         AND     R0, #0xF0       	@ mask off ms-nibble
         MOV     R0, R0, LSR #4  	@ shift to right
@@ -151,6 +148,10 @@ numtoasc:
 @   R0: Integer value of provided character
 atoi:
                                     @ TASK - add the missing code
+        CMP     R0, #0x40       	@ Compare with the character smaller than 'A/a'
+        SUBLT   R0, #0x30       	@ If in range 0-9, substract '0'
+        ORRGT   R0, #0x60               @ If in range A-F or a-f, force lower case ...
+        SUBGT   R0, #0x57       	@    and substract 'a'-10
         MOV     PC, LR
                 
 
@@ -161,6 +162,9 @@ atoi:
 @   R0: related ASCII character ('0'-'9', 'A'-'F')
 itoa:
                                     @ TASK - add the missing code
+        CMP R0, #10             @ Compare R0 to 10 (decimal)
+        ADDLT R0, #48           @ Add '48' (decimal) if < 10
+        ADDGE R0, #55           @ Add 55 (decimal) if >= 10
         MOV     PC, LR
 
 @@@@ gen_number: Generate a number based on the current time
@@ -221,8 +225,8 @@ print_lose:
 @@@@@ Constants 
 .data
 
-prompt:           .asciz  "Guess a number\n"            @ TASK: Modify the prompt to include the range of values
-.equ              prompt_len, 15
+prompt:           .asciz  "Guess a number between 0 and 0x7F:\n"            @ TASK: Modify the prompt to include the range of values
+.equ              prompt_len, 35
 higher:           .asciz  "Higher\n"
 .equ              higher_len, 7
 lower:            .asciz  "Lower\n"
