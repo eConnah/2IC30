@@ -95,7 +95,7 @@ print:
         MOV R1, R0              	@ TASK: Move address of output string(R0) to R1
         MOV R7, #SYS_WRITE              @ TASK: Put the Syscall number in R? - R7 - SYS_WRITE
         MOV R0, #STDOUT  		@ TASK: Put the monitor STDOUT in R? - R0 - #1
-        @ SWI 0                 	@ TASK: Uncomment this line to make the syscall
+        SWI 0                 	@ TASK: Uncomment this line to make the syscall
         LDMFD   SP!, {R7,LR}    	@ Restore used registers (update SP with !)
         MOV     PC, LR          	@ Return
 
@@ -111,7 +111,7 @@ read:
         MOV R1, R0                	        @ TASK: Move address of input string(R0) to R1
         MOV R7, #SYS_READ                      	@ TASK: Put the Syscall number in R?
         MOV R0, #STDIN                        	@ TASK: Put the keyboard STDIN in R?
-        @SWI 0					@ TASK: Uncomment this line to make the syscall
+        SWI 0					@ TASK: Uncomment this line to make the syscall
         LDMFD SP!, {R7, LR}     	        @ Restore used registers (update SP with !)
         MOV  PC, LR
 
