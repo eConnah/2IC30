@@ -61,6 +61,27 @@ exit:
         SWI   0
 
 @ Functions
+@@@@ play_again: Ask user if they want to play again
+@ Returns: R0 (0 if 'n', non-zero otherwise)
+play_again:
+        STMFD   SP!, {R1-R2, LR}    @ Push used registers to the stack
+        
+        LDR     R0, =play_msg       @ Load play again prompt reference
+        MOV     R1, #play_msg_len   @ Load play again prompt length
+        BL      print               @ Call print function
+        
+        LDR     R0, =input          @ Load the input buffer reference
+        MOV     R1, #3              @ Set the string length to read as 3
+        BL      read                @ Call the input function
+        
+        LDR     R1, =input          @ Reload input address
+        LDRB    R0, [R1]            @ Load the first byte of the inputted string to R0
+        
+        ORR     R0, R0, #0x20       @ Convert to lowercase (sets bit 5: 'N' becomes 'n')
+        SUBS    R0, R0, #'n'        @ Subtract lowercase 'n'. If they typed 'n', R0 is now 0.
+        
+        LDMFD   SP!, {R1-R2, LR}    @ Pop used registers from the stack
+        MOV     PC, LR              @ Return
 
 @@@@ print: Print a string to the terminal
 @ Parameters:
@@ -237,9 +258,9 @@ new_game:         .asciz  "You have 3 attempts to guess\n"
 .equ              new_game_len, 29
 lostgame:         .asciz  "You lose, the number was 00\n"
 .equ              lostgame_len, 28
-.equ              value_offset, 25  @ index into the lostgame 
-                                    @ string so the number
-                                    @ can be written into it.
+.equ              value_offset, 25
+play_msg:         .asciz  "Play again? (y/n)\n"
+.equ              play_msg_len, 18
 
 @@@@ Variables
 .align
