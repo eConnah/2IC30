@@ -12,6 +12,9 @@
 .equ STDOUT, 0x01
 .equ STDIN, 0x00
 
+.equ NUM_ATTEMPTS, 3           @ Number of attempts
+.equ TIME_ZONE, 0              @ Time zone
+
 .text
 
 @ Game control loop (between main: and _exit:)
@@ -22,7 +25,7 @@ main:
         BL    gen_number
 
         MOV   R8, R0            @ Store 'hidden' number in R8
-        MOV   R9, #3            @ Initialise remaining guesses to 3
+        MOV   R9, #NUM_ATTEMPTS @ Initialise remaining guesses to 3
         LDR   R0, =new_game     @ TASK: Load new game string
         MOV   R1, #new_game_len @ TASK: Load new game string length
         BL    print             @ Print the new game string
@@ -32,7 +35,7 @@ next_guess:
         BL    print             @ Print the prompt
 
         LDR   R0, =input        @ TASK: Load input buffer address
-        MOV   R1, 3		@ TASK: Load input buffer length
+        MOV   R1, #3		@ TASK: Load input buffer length
         BL    read		@ Read 3 chars to input buffer (including newline)
 
 	LDR   R1, =input        
@@ -175,7 +178,7 @@ itoa:
 gen_number:
         STMFD   SP!, {R1,R7,LR}
         LDR     R0, =time           @ TASK: Load address of time struct to R0
-        MOV     R1, #0              @ TASK: Load 0 into R1 (time zone)
+        MOV     R1, #TIME_ZONE            @ TASK: Load 0 into R1 (time zone)
         MOV     R7, #SYS_GETTIME    @ TASK: Place system call number for gettimeofday in R7
         SWI     0                   @ TASK: Make the system call
         LDR     R1, =musecs         @ TASK: Load a register with address of musecs variable
