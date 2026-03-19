@@ -121,19 +121,19 @@ read:
 @ Returns: 
 @   R0: calculated value
 asctonum:  
-        STMFD   SP!, {R4-R5, LR}    @ TASK: Explain why this push occurs
+        STMFD   SP!, {R4-R5, LR}    @ ? R4-R5 aren't really registers that should be overwritten so we save them as we are using them in this function and don't want to get rid of whatever was there.
         MOV     R4, #0              @ character count: find out where the newline is
         MOV     R5, #0              @ number entered in hex
 nextchar:
         LDRB    R0, [R1,R4]         @ load byte from address R1 + R4
-        CMP     R0, #0xA            @ TASK: Explain the purpose of this line of code
+        CMP     R0, #0xA            @ ? To see if this is the newline character (end of string) 
         BEQ     readall             @ done reading
         BL      atoi                @ convert to hex
         CMP     R4, #1              @ is this the first character read?
         BLT     first
                                     @ shift R5 4 bits to the left
         MOV     R5, R5, LSL #4      @ (most significant digit)
-                                    @ TASK: Explain why (in the above) we perfom a shift
+                                    @ ? since 4 bits to the left is the same as multiplying by 16 its needed for ASCII which is hexadecimal
 first:    
         ADD     R5, R0              @ add R0
         ADD     R4, #1              @ increment counter
@@ -150,7 +150,7 @@ readall:
 @ Returns:
 @   none
 numtoasc: 
-        STMFD   SP!, {R4, LR}   	@ TASK: Explain why this push occurs  @ Puts a copy of R4 to the stack
+        STMFD   SP!, {R4, LR}   	@ ? R4 isnt't really a register that should be overwritten so we save them to pop back later.
         MOV     R4, R0          	@ copy number
         AND     R0, #0xF0       	@ mask off ms-nibble
         MOV     R0, R0, LSR #4  	@ shift to right
@@ -186,7 +186,7 @@ atoi:
 itoa:
         CMP R0, #10                    @ Compare R0 to 10 (decimal)
         ADDLT R0, R0, #48              @ Add '48' (decimal) if < 10
-        ADDGE R0, R0, #55              @ Add 55 (decimal) if >= 10
+        ADDGE R0, R0, #55           @ Add 55 (decimal) if >= 10
         MOV     PC, LR
 
 @@@@ gen_number: Generate a number based on the current time
@@ -197,7 +197,7 @@ itoa:
 gen_number:
         STMFD   SP!, {R1,R7,LR}
         LDR     R0, =time           @ TASK: Load address of time struct to R0
-        MOV     R1, #TIME_ZONE      @ TASK: Load 0 into R1 (time zone)
+        MOV     R1, #TIME_ZONE            @ TASK: Load 0 into R1 (time zone)
         MOV     R7, #SYS_GETTIME    @ TASK: Place system call number for gettimeofday in R7
         SWI     0                   @ TASK: Make the system call
         LDR     R1, =musecs         @ TASK: Load a register with address of musecs variable
