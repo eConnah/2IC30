@@ -6,7 +6,7 @@
 
 .equ        RAND_LIMIT, 0xF     @ Question: What is the maximum value possible?
 .equ        SYS_EXIT,   0x1
-                                @ TASK: Add clock hardware address constant
+.equ        CLOCK_ADDR, 0x3F003004
 
 .text 
 .include "Hardware.s"	        @ open, map, unmap and close functions
