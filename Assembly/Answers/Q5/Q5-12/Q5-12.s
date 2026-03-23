@@ -12,7 +12,7 @@
 .equ STDOUT, 0x01
 .equ STDIN, 0x00
 
-.equ NUM_ATTEMPTS, 3           @ Number of attempts
+.equ NUM_ATTEMPTS, 7           @ Number of attempts
 .equ TIME_ZONE, 0              @ Time zone
 
 .text
@@ -25,10 +25,19 @@ main:
         BL    gen_number
 
         MOV   R8, R0            @ Store 'hidden' number in R8
-        MOV   R9, #NUM_ATTEMPTS @ Initialise remaining guesses to 3
-        LDR   R0, =new_game     @ TASK: Load new game string
-        MOV   R1, #new_game_len @ TASK: Load new game string length
-        BL    print             @ Print the new game string
+        MOV   R9, #NUM_ATTEMPTS @ Initialise remaining guesses to NUM_ATTEMPTS
+        @ LDR   R0, =new_game     @ TASK: Load new game string
+        @ MOV   R1, #new_game_len @ TASK: Load new game string length
+        @ BL    print             @ Print the new game string
+        
+        MOV     R0, #NUM_ATTEMPTS   @ Put the number of attempts into R0
+        BL      itoa                @ Convert it to an ASCII character
+        LDR     R1, =new_game       @ Load the string address
+        STRB    R0, [R1, #new_game_offset] @ Overwrite the '0' with our new character!
+        
+        LDR     R0, =new_game       @ Set R0 for printing
+        MOV     R1, #new_game_len   @ Set R1 for printing
+        BL      print               @ Print string with the number
 next_guess:
 	LDR   R0, =prompt       @ TASK: Load prompt string address
 	MOV   R1, #prompt_len   @ TASK: Load prompt length
@@ -233,7 +242,7 @@ print_hint:
 print_lose:
         STMFD   SP!, {R1-R2, LR}
         LDR     R1, =lostgame       @ Load 'lost-game' string buffer reference
-        ADD     R1, #value_offset   @ Adjust to the position of the number
+        ADD     R1, #lostgame_offset   @ Adjust to the position of the number
         BL      numtoasc            @ Write hidden value to buffer
         LDR     R0, =lostgame       @ Restore buffer reference
         MOV     R1, #lostgame_len   @ ... and its length
@@ -252,11 +261,12 @@ lower:            .asciz  "Lower\n"
 .equ              lower_len, 6
 congrats:         .asciz  "Congrats, you guessed it\n"
 .equ              congrats_len, 25
-new_game:         .asciz  "You have 3 attempts to guess\n"     
+new_game:         .asciz  "You have 0 attempts to guess\n"
 .equ              new_game_len, 29
+.equ              new_game_offset, 9
 lostgame:         .asciz  "You lose, the number was 00\n"
 .equ              lostgame_len, 28
-.equ              value_offset, 25
+.equ              lostgame_offset, 25
 play_msg:         .asciz  "Play again? (y/n)\n"
 .equ              play_msg_len, 18
 
