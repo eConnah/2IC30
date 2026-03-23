@@ -23,9 +23,10 @@ main:
 
 exit:
     LDR     R0, =clockbase      @ Load start address of map
-    LDR     R0, [R0]            @ ! VERIFY I AINT TWEAKING
+    LDR     R0, [R0]            @ ! is this line not missing?
     BL      unmap               @ Unmap the access to hardware
-                                @ TASK: Load the value of the file descriptor
+    LDR     R1, =file_desc      @ TASK: Load the value of the file descriptor
+    LDR     R0, [R1]            @ Load the file descriptor value
     BL      close_mem           @ Close /dev/mem
     MOV     R0, R8              @ Place random number in R0 (view on terminal with echo $?)
     MOV     R7, #SYS_EXIT       @ exit syscall

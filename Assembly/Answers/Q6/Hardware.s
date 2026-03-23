@@ -77,6 +77,7 @@ unmap:
 @@@@ close: Release access to a hardware memory location
 @ Parameters:
 @   R0: File descriptor
+@ ! VERIFY: R1 is also a paramater no?
 @ Returns:
 @   None
 close_mem:
