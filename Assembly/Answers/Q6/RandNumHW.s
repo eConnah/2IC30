@@ -9,7 +9,7 @@
                                 @ TASK: Add clock hardware address constant
 
 .text 
-
+.include "Hardware.s"	        @ open, map, unmap and close functions
 
 main:     
     BL      open_mem            @ Open /dev/mem  (requires sudo)
