@@ -39,7 +39,6 @@ open_mem:
 @   R0:             Start address of memory to be mapped
 @ Returns:
 @   R0:             Start address of mapped memory in Pi's address space
-@ xxx  R1:             Base of the memory block (4096 boundary)
 map:
         STMFD   SP!, {R2-R7, LR}    @ Push used registers to stack
         MOV     R7, #SYS_MAP        @ Load map system call number

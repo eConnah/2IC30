@@ -15,7 +15,7 @@ main:
     BL      open_mem            @ Open /dev/mem  (requires sudo)
     LDR     R0, =CLOCK_ADDR     @ TASK: Load hardware clock address
     BL      map                 @ Map hardware clock to memory (R0 contains address)
-                                @ TASK: Load address of clockbase variable
+    LDR     R1, =clockbase      @ TASK: Load address of clockbase variable
     STR     R0, [R1]            @ Store mapped memory start address in variable clockbase
 
     BL      gen_number_hardware @ Generate a random number (returned in R0)
