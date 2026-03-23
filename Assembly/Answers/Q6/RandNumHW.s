@@ -53,8 +53,7 @@ gen_number_hardware:
 .data     
 
 @@@@ Constants
-
-                                    @ TASK: Add string constant for filename
+dev_mem: .asciz "/dev/mem"
 
 .align 4
 file_desc:      .word 0x0           @ File descriptor for /dev/mem
