@@ -1,5 +1,5 @@
 {
-  description = "Raspberry Pi Assembly Dev Environment (Full Linux GCC)";
+  description = "Safe ARM32 Assembly Environment";
 
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
@@ -8,56 +8,67 @@
 
   outputs = { flake-parts, ... }@inputs:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      # Locked to Linux systems since macOS Darwin can't run Linux syscalls natively
       systems = [ "x86_64-linux" "aarch64-linux" ];
 
-      perSystem = { pkgs, system, ... }: 
+      perSystem = { pkgs, ... }: 
         let
-          # Define our custom '32compile' command
+          # 1. Compilation Script
           compileScript = pkgs.writeShellScriptBin "32compile" ''
-            # Check if the user actually provided a file
             if [ -z "$1" ]; then
-              echo "⚠️  Usage: 32compile <filename.s>"
+              echo "Usage: 32compile <file.s>"
               exit 1
             fi
 
             INPUT="$1"
-            # Bash string manipulation to strip the extension for the output name
             OUTPUT="''${INPUT%.*}"
 
-            echo "🛠️  Compiling $INPUT -> $OUTPUT..."
+            echo "🛠️ Compiling $INPUT..."
             armv7l-unknown-linux-gnueabihf-gcc -static -nostdlib -e main -g -o "$OUTPUT" "$INPUT"
 
-            # Check if compilation was successful ($? is the exit code of the last command)
             if [ $? -eq 0 ]; then
-              echo "✅ Success! Run your program with:"
-              echo "   qemu-arm ./$OUTPUT"
+              echo "✅ Compiled: $OUTPUT"
+              echo "👉 To run: 32wrap $OUTPUT"
             else
-              echo "❌ Compilation failed. Check your assembly syntax!"
+              echo "❌ Compilation failed."
+              exit 1
             fi
           '';
+
+          # 2. Bubblewrap/QEMU Execution Script
+          wrapScript = pkgs.writeShellScriptBin "32wrap" ''
+            if [ -z "$1" ]; then
+              echo "Usage: 32wrap <executable>"
+              exit 1
+            fi
+
+            BIN="$1"
+
+            echo "🚀 Running $BIN in READ-ONLY mode..."
+            # --ro-bind / /  => Mounts your entire drive as READ ONLY
+            # --dev /dev     => Allows printing to your terminal screen
+            ${pkgs.bubblewrap}/bin/bwrap --ro-bind / / --dev /dev ${pkgs.qemu}/bin/qemu-arm "./$BIN"
+          '';
+
         in {
-        
         devShells.default = pkgs.mkShell {
           packages = [
-            # The full Linux cross-compiler for 32-bit ARM (armhf)
             pkgs.pkgsCross.armv7l-hf-multiplatform.buildPackages.gcc
             pkgs.qemu
-            # Inject our custom command into the shell environment
+            pkgs.bubblewrap
             compileScript
-          ];
+            wrapScript
+          ];          
 
           shellHook = ''
             echo "================================================="
             echo " 🐧 Full Linux ARM32 Assembly Environment Ready! 🐧"
             echo "================================================="
             echo "Available Commands:"
-            echo "  1. Compile : 32compile file.s"
-            echo "  2. Execute : qemu-arm ./file"
+            echo "  1. Compile   : 32compile file.s"
+            echo "  2. BWrap Run : 32wrap file"
             echo "================================================="
           '';
         };
-
       };
     };
 }
