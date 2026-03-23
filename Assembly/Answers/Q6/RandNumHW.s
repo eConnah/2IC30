@@ -13,7 +13,7 @@
 
 main:     
     BL      open_mem            @ Open /dev/mem  (requires sudo)
-                                @ TASK: Load hardware clock address
+    LDR     R0, =CLOCK_ADDR     @ TASK: Load hardware clock address
     BL      map                 @ Map hardware clock to memory (R0 contains address)
                                 @ TASK: Load address of clockbase variable
     STR     R0, [R1]            @ Store mapped memory start address in variable clockbase
