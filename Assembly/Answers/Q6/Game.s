@@ -15,14 +15,18 @@
 .equ NUM_ATTEMPTS, 7           @ Number of attempts
 .equ TIME_ZONE, 0              @ Time zone
 
+.equ RAND_LIMIT, 0x7F           @ Max Random value
+.equ CLOCK_ADDR, 0x3F003004    @ Clock Address
+
 .text
+.include "Hardware.s"           @ open, map, unmap and close functions
 
 @ Game control loop (between main: and _exit:)
 @ Register usage:
 @ R8: generated random number
 @ R9: guesses remaining
 main:
-        BL    gen_number
+        BL    gen_number_hardware  @ Generate a random number (returned in R0)
 
         MOV   R8, R0            @ Store 'hidden' number in R8
         MOV   R9, #NUM_ATTEMPTS @ Initialise remaining guesses to NUM_ATTEMPTS
@@ -215,6 +219,43 @@ gen_number:
         LDMFD   SP!, {R1,R7,LR}
         MOV     PC, LR
 
+
+@@@@ gen_number_hardware: Generate a number based on the hardware clock
+@ Parameters:
+@   none
+@ Returns: 
+@   R0:             7-bit 'random' value
+gen_number_hardware:
+        STMFD   SP!, {R1, R8, LR}           @ R1 used in this function so store on stack
+
+        BL      open_mem            @ Open /dev/mem  (requires sudo)
+        LDR     R0, =CLOCK_ADDR     @ TASK: Load hardware clock address
+        BL      map                 @ Map hardware clock to memory (R0 contains address)
+        LDR     R1, =clockbase      @ TASK: Load address of clockbase variable
+        STR     R0, [R1]            @ Store mapped memory start address in variable clockbase
+        
+        LDR     R1, =clockbase      @ Load mapped memory address
+        LDR     R1, [R1]            @ Load mapped memory address contents
+        CMP     R1, #0              @ Check if clockbase was initialized
+        MOVEQ   R0, #RAND_LIMIT     @ If not initialized, return a fixed number.
+        LDRGT   R0, [R1, #4]        @ Otherwise, load hardware clock value.
+        AND     R0, #RAND_LIMIT     @ Mask lower 7 bits
+
+        MOV     R8, R0              @ Temporarily move random number to R8
+
+        LDR     R0, =clockbase      @ Load start address of map
+        LDR     R0, [R0]            @ ! is this line not missing?
+        BL      unmap               @ Unmap the access to hardware
+        LDR     R1, =file_desc      @ TASK: Load the value of the file descriptor
+        LDR     R0, [R1]            @ Load the file descriptor value
+        BL      close_mem           @ Close /dev/mem
+        MOV     R0, R8              @ Place random number in R0 (view on terminal with echo $?)
+
+        LDMFD   SP!, {R1, R8, LR}
+        MOV     PC, LR
+
+
+
 @@@@ print_hint:	Indicate whether the number is higher, lower or correct.
 @ Parameters: 
 @   R0: guessed value
@@ -270,9 +311,16 @@ lostgame:         .asciz  "You lose, the number was 00\n"
 play_msg:         .asciz  "Play again? (y/n)\n"
 .equ              play_msg_len, 18
 
+dev_mem: .asciz "/dev/mem"
+
+
 @@@@ Variables
 .align
 input:            .space 3              @ TASK: Create user guess variable here (input buffer)  @ 2 characters + newline 
 .align
 time:             .space 4      	@ Time (s) since Jan 1 1970
 musecs:           .space 4      	@ Time (ms)
+
+.align 4
+file_desc:      .word 0x0           @ File descriptor for /dev/mem
+clockbase:      .word 0x0           @ TASK: Add variable to store start of mapped hardware address

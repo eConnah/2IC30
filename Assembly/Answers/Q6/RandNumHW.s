@@ -4,7 +4,7 @@
 
 .global     main
 
-.equ        RAND_LIMIT, 0xF     @ Question: What is the maximum value possible?
+.equ        RAND_LIMIT, 0x7F     @ Question: What is the maximum value possible?
 .equ        SYS_EXIT,   0x1
 .equ        CLOCK_ADDR, 0x3F003004
 
