@@ -23,6 +23,7 @@ main:
 
 exit:
     LDR     R0, =clockbase      @ Load start address of map
+    LDR     R0, [R0]            @ ! VERIFY I AINT TWEAKING
     BL      unmap               @ Unmap the access to hardware
                                 @ TASK: Load the value of the file descriptor
     BL      close_mem           @ Close /dev/mem
