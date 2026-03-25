@@ -169,3 +169,17 @@ dev_mem:	.asciz "/dev/mem"
 .align 4
 file_desc:  .word	0x0			    @ file descriptor
 gpiobase:	.word	0x0			    @ address to which gpio is mapped
+
+clockbase:      .word 0x0 
+
+.align 4
+input:      .space 4        @ Allocate memory for user input
+
+.align 4
+brightness_levels:
+    .word   0       @ Option 0: 0% brightness (0us ON)
+    .word   200     @ Option 1: 20% brightness (200us ON)
+    .word   400     @ Option 2: 40% brightness (400us ON)
+    .word   600     @ Option 3: 60% brightness (600us ON)
+    .word   800     @ Option 4: 80% brightness (800us ON)
+    .word   1000    @ Option 5: 100% brightness (1000us ON)
