@@ -6,7 +6,7 @@
 
 .equ        RAND_LIMIT, 0x7F     @ Question: What is the maximum value possible?
 .equ        SYS_EXIT,   0x1
-.equ        CLOCK_ADDR, 0x3F003004
+.equ        CLOCK_ADDR, 0x3F003000
 
 .text 
 .include "Hardware.s"	        @ open, map, unmap and close functions

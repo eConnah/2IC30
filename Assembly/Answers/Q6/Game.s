@@ -16,7 +16,7 @@
 .equ TIME_ZONE, 0              @ Time zone
 
 .equ RAND_LIMIT, 0x7F           @ Max Random value
-.equ CLOCK_ADDR, 0x3F003004    @ Clock Address
+.equ CLOCK_ADDR, 0x3F003000    @ Clock Address
 
 .text
 .include "Hardware.s"           @ open, map, unmap and close functions
@@ -226,7 +226,7 @@ gen_number:
 @ Returns: 
 @   R0:             7-bit 'random' value
 gen_number_hardware:
-        STMFD   SP!, {R1, R8, LR}           @ R1 used in this function so store on stack
+        STMFD   SP!, {R0, R1, R8, LR}           @ R1 used in this function so store on stack
 
         BL      open_mem            @ Open /dev/mem  (requires sudo)
         LDR     R0, =CLOCK_ADDR     @ TASK: Load hardware clock address
@@ -248,10 +248,10 @@ gen_number_hardware:
         BL      unmap               @ Unmap the access to hardware
         LDR     R1, =file_desc      @ TASK: Load the value of the file descriptor
         LDR     R0, [R1]            @ Load the file descriptor value
-        BL      close_mem           @ Close /dev/mem
+        BL      close_mem           @< Close /dev/mem
         MOV     R0, R8              @ Place random number in R0 (view on terminal with echo $?)
 
-        LDMFD   SP!, {R1, R8, LR}
+        LDMFD   SP!, {R0, R1, R8, LR}
         MOV     PC, LR
 
 
