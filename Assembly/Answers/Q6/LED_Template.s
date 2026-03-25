@@ -14,20 +14,20 @@
 
 .global main
 
-.equ        SYS_EXIT,   0x1
+.equ        SYS_EXIT,   0x01
+.equ        SYS_READ,   0x03
+.equ        SYS_WRITE,  0x04
+.equ        SYS_GETTIME, 0x4E
+.equ        STDOUT, 0x01
+.equ        STDIN, 0x00
+
 .equ        GPCLR0,     0x28        @ Value to set a GPIO pin to OFF
 .equ        GPSET0,     0x1C        @ Value to set a GPIO pin to ON
 .equ        GERT22,     22          @ RPi GPIO to gertboard mappings
 .equ        GERT23,     23          @ RPi GPIO to gertboard mappings
-.equ        GERT24,     24          @ RPi GPIO to gertboard mappings
 .equ        GPIO_ADDR,	0x3F200000  @ GPIO_Base for RPi 3 
 
-.equ        PERIOD,                1024            @ Total cycle time in microseconds (1ms)
-.equ        ON_TIME_ONE,           338             @ ! MUST BE THE SMALLER WAIT TIME
-.equ        ON_TIME_TWO_CHOICE,    676             @ Time for which LED is on in microseconds
-
-.equ        ON_TIME_TWO,    (ON_TIME_TWO_CHOICE - ON_TIME_ONE)             @ Time for which LED is on in microseconds
-.equ        OFF_TIME,       (PERIOD - ON_TIME_TWO_CHOICE) @ The assembler calculates this
+.equ        PERIOD,     1024            @ Total cycle time in microseconds (1ms)
 
 .text
 .include "Hardware2.s"           @ open, map, unmap and close functions
@@ -48,15 +48,31 @@ main:
 		CMP		R0, #0				@ If return value ... 
 		BLT		exit				@	<0 (error) then exit
 
-                MOV		R0, #GERT24			@ Pin number
-		MOV		R1, #1				@ Code for output
-		BL		set_pin_function	@ Set pin to output
-		CMP		R0, #0				@ If return value ... 
-		BLT		exit				@	<0 (error) then exit
-
                 MOV		R0, #GERT22			@ Pin number
                 MOV 	        R1, #GPSET0		    @ Set (turn on LED)
                 BL		set_pin_value	    @ Turn on LED
+
+                LDR   R0, =prompt       @ TASK: Load prompt string address
+		MOV   R1, #prompt_len   @ TASK: Load prompt length
+                BL    print             @ Print the prompt
+
+                LDR   R0, =input        @ TASK: Load input buffer address
+                MOV   R1, #1		@ TASK: Load input buffer length
+                BL    read		@ Read 1 chars to input buffer (including newline)
+
+		LDR   R0, =input        @ TASK: Load input buffer address
+		LDRB  R0, [R0]          @ Load the first byte of input (the character) into R0
+
+                SUB     R0, R0, #'0'              @ subtract 0 char to get value 0-5 in R0
+                CMP     R0, #5                    @ compare to 5
+                MOVGT   R0, #5                    @ if >5, set R0 to 5
+                CMP     R0, #0                    @ compare to 0
+                MOVLT   R0, #0                    @ if <0, set R0 to
+                MOV     R0, R0, LSL #2            @ quadruple it since arrays have 4 byte words
+                LDR     R1, =brightness_levels    @ load base address of brightness levels array 
+                LDR     R6, [R1, R0]              @ load specific element
+                LDR     R7, =PERIOD
+                SUB     R7, R7, R6                @ calculate off time = total time
 
                 MOV             R4, #10000			        @ 10000 seems reasonable amount of blinks
                 BL              start_loop			@ Blink the LED a few times
@@ -70,40 +86,62 @@ exit:
 
 @ Functions
 start_loop:
-STMFD        SP!, {R0, R1, R4, LR}	@ Save registers that will be used in blink_loop
+STMFD        SP!, {R0, R1, R4, R6, R7, LR}	@ Save registers that will be used in blink_loop
 
 blink_loop:
 MOV		R0, #GERT23			@ Pin number
-MOV 	        R1, #GPSET0		    @ Set (turn off LED)
+MOV 	        R1, #GPCLR0		    @ Set (turn off LED)
 BL		set_pin_value	    @ Turn on LED
 
-LDR             R0, =ON_TIME_TWO			@ delay in ms
-BL              wait_micro
-
-MOV		R0, #GERT24			@ Pin number
-MOV 	        R1, #GPSET0		    @ Set (turn off LED)
-BL		set_pin_value	    @ Turn on LED
-
-LDR             R0, =ON_TIME_ONE			@ delay in ms
+MOV             R0, R6			@ delay in ms
 BL              wait_micro
 
 MOV		R0, #GERT23			@ Pin number
-MOV 	        R1, #GPCLR0		    @ Set (turn on LED)
+MOV 	        R1, #GPSET0		    @ Set (turn on LED)
 BL		set_pin_value	    @ Turn on LED
 
-MOV		R0, #GERT24			@ Pin number
-MOV 	        R1, #GPCLR0		    @ Set (turn on LED)
-BL		set_pin_value	    @ Turn on LED
-
-LDR             R0, =OFF_TIME			@ delay in ms
+MOV             R0, R7			@ delay in ms
 BL              wait_micro
 
 SUBS		R4, R4, #1		@ Decrement counter
 CMP             R4, #0			@ Compare counter to 0
 BGT             blink_loop		@ If counter > 0, branch to blink_loop
 
-STMFD        SP!, {R0, R1, R4, LR}	@ Restore registers
+STMFD        SP!, {R0, R1, R4, R6, R7, LR}	@ Restore registers
 MOV          PC, LR
+
+@@@@ read: read a string from keyboard and store in variable
+@ Parameters:
+@   R0: address of where to store string
+@   R1: number of characters to store
+@ Returns:
+@   none
+read:
+        STMFD SP!, {R7, LR}     	        @ Push used registers and LR to stack
+        MOV R2, R1                        	@ TASK: Move number of characters to read(R1) to R2
+        MOV R1, R0                	        @ TASK: Move address of input string(R0) to R1
+        MOV R7, #SYS_READ                      	@ TASK: Put the Syscall number in R?
+        MOV R0, #STDIN                        	@ TASK: Put the keyboard STDIN in R?
+        SWI 0					@ TASK: Uncomment this line to make the syscall
+        LDMFD SP!, {R7, LR}     	        @ Restore used registers (update SP with !)
+        MOV  PC, LR
+
+@@@@ print: Print a string to the terminal
+@ Parameters:
+@   R0: address of string
+@   R1: length of string
+@ Returns:
+@   none
+print:                      
+        STMFD   SP!, {R7,LR}    	@ Push used registers and LR on the stack;
+        MOV R2, R1                	@ TASK: Move number of characters to print(R1) to R2
+        MOV R1, R0              	@ TASK: Move address of output string(R0) to R1
+        MOV R7, #SYS_WRITE              @ TASK: Put the Syscall number in R? - R7 - SYS_WRITE
+        MOV R0, #STDOUT  		@ TASK: Put the monitor STDOUT in R? - R0 - #1
+        SWI 0                 	@ TASK: Uncomment this line to make the syscall
+        LDMFD   SP!, {R7,LR}    	@ Restore used registers (update SP with !)
+        MOV     PC, LR          	@ Return
+
 
 @@@@@ set_pin_function : function to set pin n to output in GPSELm
 @ Parameters: 
@@ -215,10 +253,13 @@ ret:
 .data
 @@@@ Constants
 dev_mem:	.asciz "/dev/mem"
+prompt:           .asciz  "Enter a brightness 0-5:\n"            @ TASK: Modify the prompt to include the range of values
+.equ              prompt_len, . - prompt   @ Assembler calculates exact length
+
 
 @@@@ Variables
 .align 4
-file_desc:  .word	0x0			    @ file descriptor
+file_desc:      .word	0x0			    @ file descriptor
 gpiobase:	.word	0x0			    @ address to which gpio is mapped
 
 clockbase:      .word 0x0 
@@ -233,4 +274,5 @@ brightness_levels:
     .word   400     @ Option 2: 40% brightness (400us ON)
     .word   600     @ Option 3: 60% brightness (600us ON)
     .word   800     @ Option 4: 80% brightness (800us ON)
+    .word   1000    @ Option 5: 100% brightness (1000us ON)
     .word   1000    @ Option 5: 100% brightness (1000us ON)
