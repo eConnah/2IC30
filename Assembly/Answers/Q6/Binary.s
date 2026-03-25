@@ -24,19 +24,31 @@
 .text
 .include "Init_pins.s"
 .include "Hardware2.s"
-
+.include "Wait.s"
 
 main:
 		BL	    map_io          	@ open /dev/mem and map hardware
     	BL	    init_pins
-    	MVN	    R0, #0          	@ ? nots 0 to get max value and puts in R0
-    	BL	    disp_num
+		BL	    init_count		    @ initialize counter for loop
 exit:
 		BL	    unmap_io        	@ unmap and close hardware addresses
 		MOV	    R7, #SYS_EXIT
 		SWI	    0
 
 @ Functions
+init_count:
+		STMFD	SP!, {LR}		 @ save R4 and LR
+    	MOV	    R8, #0           @ puts 0 in the counter register
+count_to_3FF:
+		MOV     R0, R8           @ move counter value to R0
+		BL	    disp_num         @ display the number in binary on the LEDs
+		ADD	    R8, #1           @ increase counter
+		MOV     R0, #100       @ wait for 100 ms
+		BL	    wait             @ wait for a short period
+		CMP	    R8, #1024      @ compare to 1024
+		BNE	    count_to_3FF     @ if not 1024, repeat loop
+		LDMFD	SP!, {LR}		 @ restore R4 and LR
+		MOV     PC, LR           @ return
 
 @@@@ disp_num : Function to display a number in binary on LEDS
 @ Parameters:
