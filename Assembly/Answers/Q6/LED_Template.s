@@ -18,41 +18,71 @@
 .equ        GPCLR0,     0x28        @ Value to set a GPIO pin to OFF
 .equ        GPSET0,     0x1C        @ Value to set a GPIO pin to ON
 .equ        GERT22,     22          @ RPi GPIO to gertboard mappings
+.equ        GERT23,     23          @ RPi GPIO to gertboard mappings
 .equ        GPIO_ADDR,	0x3F200000  @ GPIO_Base for RPi 3 
 
 .text
-.include "Hardware.s"           @ open, map, unmap and close functions
+.include "Hardware2.s"           @ open, map, unmap and close functions
+.include "Wait.s"                @ wait function
 
 main:                               
-		BL		open_mem		    @ Open /dev/mem
-		LDR		R0, =GPIO_ADDR	    @ Load hardware address to map
- 		BL		map				    @ call mmap2
-		LDR		R1, =gpiobase	    @ Store address of mapping
-		STR		R0, [R1]
+                BL              map_io		    @ Open /dev/mem
 
-		MOV		R0, #GERT22			@ Pin number
+                MOV		R0, #GERT22			@ Pin number
 		MOV		R1, #1				@ Code for output
 		BL		set_pin_function	@ Set pin to output
 		CMP		R0, #0				@ If return value ... 
 		BLT		exit				@	<0 (error) then exit
 
-		MOV		R0, #GERT22			@ Pin number
-		MOV 	        R1, #GPSET0		    @ Set (turn on LED)
-		BL		set_pin_value	    @ Turn on LED
+                MOV		R0, #GERT23			@ Pin number
+		MOV		R1, #1				@ Code for output
+		BL		set_pin_function	@ Set pin to output
+		CMP		R0, #0				@ If return value ... 
+		BLT		exit				@	<0 (error) then exit
+
+                MOV             R4, #10			        @ it says 10 blinks
+                BL              start_loop			@ Blink the LED a few times
+
 exit:
-		LDR		R0, =gpiobase	    @ Load start unmap the memory
-                LDR             R0, [R0]
-		BL		unmap			    @ Unmap
-		LDR	        R1, =file_desc    	@ Load file decriptor address
-                LDR	        R0, [R1]            @ Load file descriptor value
-		BL		close_mem		    @ Close /dev/mem
+                BL              unmap_io		    @ Unmap
 							
 		MOV		R7, #SYS_EXIT	    @ Return
 		SWI		0
 
 
 @ Functions
+start_loop:
+STMFD        SP!, {R0, R1, R4, LR}	@ Save registers that will be used in blink_loop
 
+blink_loop:
+MOV		R0, #GERT22			@ Pin number
+MOV 	        R1, #GPSET0		    @ Set (turn on LED)
+BL		set_pin_value	    @ Turn on LED
+
+MOV		R0, #GERT23			@ Pin number
+MOV 	        R1, #GPCLR0		    @ Set (turn off LED)
+BL		set_pin_value	    @ Turn on LED
+
+MOV             R0, #250			@ delay in ms
+BL              wait
+
+MOV		R0, #GERT22			@ Pin number
+MOV 	        R1, #GPCLR0		    @ Set (turn off LED)
+BL		set_pin_value	    @ Turn on LED
+
+MOV		R0, #GERT23			@ Pin number
+MOV 	        R1, #GPSET0		    @ Set (turn on LED)
+BL		set_pin_value	    @ Turn on LED
+
+MOV             R0, #250			@ delay in ms
+BL              wait
+
+SUBS		R4, R4, #1		@ Decrement counter
+CMP             R4, #0			@ Compare counter to 0
+BGT             blink_loop		@ If counter > 0, branch to blink_loop
+
+STMFD        SP!, {R0, R1, R4, LR}	@ Restore registers
+MOV          PC, LR
 
 @@@@@ set_pin_function : function to set pin n to output in GPSELm
 @ Parameters: 
