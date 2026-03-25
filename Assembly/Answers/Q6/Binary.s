@@ -18,7 +18,7 @@
 
 .equ		GPCLR0, 0x28			@ Value to set a GPIO pin to OFF
 .equ		GPSET0, 0x1C			@ Value to set a GPIO pin to ON
-
+.equ        DISP_MASK,  0x09C6009C  @ Mask of all 10 LED pins combined
                                     @ TASK: Create a constant for the mask
                                     
 .text
@@ -29,7 +29,7 @@
 main:
 		BL	    map_io          	@ open /dev/mem and map hardware
     	BL	    init_pins
-    	MVN	    R0, #0          	@ Value to display
+    	MVN	    R0, #0          	@ ? nots 0 to get max value and puts in R0
     	BL	    disp_num
 exit:
 		BL	    unmap_io        	@ unmap and close hardware addresses
@@ -179,16 +179,29 @@ ret:	MOV     PC, LR
 .data
 @@@@ Constants
 
-
 @ Mapping of bits to GPIO pins
 @ Note: the numbers on the Gertboard don't match the GPIO numbers.
 @       See page 10 of the Gertboard documentation.
 .align 4
 disp_bits:
-    .word   0x4             		@ bits[0]: GPIO2  represents bit 0 (GP0 on GB)
-    .word   0x8             		@ bits[1]: GPIO3  represents bit 1 (GP1 on GB)
-                            		@ TASK : Complete the array
+    .word   0x4         @ bits[0]: GP0  -> GPIO2
+    .word   0x8         @ bits[1]: GP1  -> GPIO3
+    .word   0x10        @ bits[2]: GP4  -> GPIO4
+    .word   0x80        @ bits[3]: GP7  -> GPIO7
+    .word   0x20000     @ bits[4]: GP17 -> GPIO17
+    .word   0x40000     @ bits[5]: GP18 -> GPIO18
+    .word   0x8000000   @ bits[6]: GP21 -> GPIO27
+    .word   0x400000    @ bits[7]: GP22 -> GPIO22
+    .word   0x800000    @ bits[8]: GP23 -> GPIO23
+    .word   0x1000000   @ bits[9]: GP24 -> GPIO24
 
 @@@@ Variables
-                            		
+.align
+input:            .space 3              @ TASK: Create user guess variable here (input buffer)  @ 2 characters + newline 
 
+dev_mem: .asciz "/dev/mem"
+                   		
+.align 4
+file_desc:      .word 0x0           @ File descriptor for /dev/mem
+clockbase:      .word 0x0           @ TASK: Add variable to store start of mapped hardware address
+gpiobase:	.word	0x0			    @ address to which gpio is mapped
