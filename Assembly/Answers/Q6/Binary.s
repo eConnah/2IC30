@@ -14,7 +14,12 @@
 
 .global main
 
-.equ        SYS_EXIT,   0x1
+.equ SYS_EXIT, 0x01
+.equ SYS_READ, 0x03
+.equ SYS_WRITE, 0x04
+.equ SYS_GETTIME, 0x4E
+.equ STDOUT, 0x01
+.equ STDIN, 0x00
 
 .equ		GPCLR0, 0x28			@ Value to set a GPIO pin to OFF
 .equ		GPSET0, 0x1C			@ Value to set a GPIO pin to ON
@@ -29,26 +34,85 @@
 main:
 		BL	    map_io          	@ open /dev/mem and map hardware
     	BL	    init_pins
-		BL	    init_count		    @ initialize counter for loop
+
+		LDR   R0, =prompt       @ TASK: Load prompt string address
+		MOV   R1, #prompt_len   @ TASK: Load prompt length
+        BL    print             @ Print the prompt
+
+        LDR   R0, =input        @ TASK: Load input buffer address
+        MOV   R1, #1		@ TASK: Load input buffer length
+        BL    read		@ Read 1 chars to input buffer (including newline)
+
+		LDR   R0, =input        @ TASK: Load input buffer address
+		LDRB  R0, [R0]         @ Load the first byte of input (the character) into R0
+		CMP   R0, #'1'		    @ TASK: Compare input to '1'
+		BLEQ   count_up          @ If '1' then count up
+		BLNE   count_down        @ else count down
 exit:
 		BL	    unmap_io        	@ unmap and close hardware addresses
 		MOV	    R7, #SYS_EXIT
 		SWI	    0
 
 @ Functions
-init_count:
-		STMFD	SP!, {LR}		 @ save R4 and LR
+count_up:
+		STMFD	SP!, {R8, R9, LR}		 @ save R4 and LR
     	MOV	    R8, #0           @ puts 0 in the counter register
-count_to_3FF:
+		MOV     R9, #1		     @ puts 1 in the increment register
+		BAL	    count_somehow     @ call function to count to 1023 (0x3FF)
+count_down:
+		STMFD	SP!, {R8, R9, LR}		 @ save R4 and LR
+		MOV	    R8, #1023        @ puts 1023 in the counter register
+		MOV     R9, #-1	     @ puts -1 in the increment register
+count_somehow:
 		MOV     R0, R8           @ move counter value to R0
 		BL	    disp_num         @ display the number in binary on the LEDs
-		ADD	    R8, #1           @ increase counter
+		ADD	    R8, R9           @ increase counter
 		MOV     R0, #100       @ wait for 100 ms
 		BL	    wait             @ wait for a short period
 		CMP	    R8, #1024      @ compare to 1024
-		BNE	    count_to_3FF     @ if not 1024, repeat loop
-		LDMFD	SP!, {LR}		 @ restore R4 and LR
-		MOV     PC, LR           @ return
+		BEQ	    count_end     @ if not 1024, repeat loop
+		CMP	    R8, #-1         @ if counting down, check if -1
+		BEQ	    count_end     @ if not -1, repeat loop
+
+		BAL	    count_somehow     @ repeat loop
+
+count_end:
+		LDMFD	SP!, {R8, R9, LR}		 @ restore R4 and LR
+		MOV     PC, LR                   @ return
+
+
+@@@@ read: read a string from keyboard and store in variable
+@ Parameters:
+@   R0: address of where to store string
+@   R1: number of characters to store
+@ Returns:
+@   none
+read:
+        STMFD SP!, {R7, LR}     	        @ Push used registers and LR to stack
+        MOV R2, R1                        	@ TASK: Move number of characters to read(R1) to R2
+        MOV R1, R0                	        @ TASK: Move address of input string(R0) to R1
+        MOV R7, #SYS_READ                      	@ TASK: Put the Syscall number in R?
+        MOV R0, #STDIN                        	@ TASK: Put the keyboard STDIN in R?
+        SWI 0					@ TASK: Uncomment this line to make the syscall
+        LDMFD SP!, {R7, LR}     	        @ Restore used registers (update SP with !)
+        MOV  PC, LR
+
+@@@@ print: Print a string to the terminal
+@ Parameters:
+@   R0: address of string
+@   R1: length of string
+@ Returns:
+@   none
+print:                      
+        STMFD   SP!, {R7,LR}    	@ Push used registers and LR on the stack;
+        MOV R2, R1                	@ TASK: Move number of characters to print(R1) to R2
+        MOV R1, R0              	@ TASK: Move address of output string(R0) to R1
+        MOV R7, #SYS_WRITE              @ TASK: Put the Syscall number in R? - R7 - SYS_WRITE
+        MOV R0, #STDOUT  		@ TASK: Put the monitor STDOUT in R? - R0 - #1
+        SWI 0                 	@ TASK: Uncomment this line to make the syscall
+        LDMFD   SP!, {R7,LR}    	@ Restore used registers (update SP with !)
+        MOV     PC, LR          	@ Return
+
 
 @@@@ disp_num : Function to display a number in binary on LEDS
 @ Parameters:
@@ -190,6 +254,8 @@ ret:	MOV     PC, LR
 
 .data
 @@@@ Constants
+prompt:           .asciz  "Press 1 to count up else count down:\n"            @ TASK: Modify the prompt to include the range of values
+.equ              prompt_len, . - prompt   @ Assembler calculates exact length
 
 @ Mapping of bits to GPIO pins
 @ Note: the numbers on the Gertboard don't match the GPIO numbers.
@@ -217,3 +283,4 @@ dev_mem: .asciz "/dev/mem"
 file_desc:      .word 0x0           @ File descriptor for /dev/mem
 clockbase:      .word 0x0           @ TASK: Add variable to store start of mapped hardware address
 gpiobase:	.word	0x0			    @ address to which gpio is mapped
+
