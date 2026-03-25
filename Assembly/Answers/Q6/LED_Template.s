@@ -19,11 +19,15 @@
 .equ        GPSET0,     0x1C        @ Value to set a GPIO pin to ON
 .equ        GERT22,     22          @ RPi GPIO to gertboard mappings
 .equ        GERT23,     23          @ RPi GPIO to gertboard mappings
+.equ        GERT24,     24          @ RPi GPIO to gertboard mappings
 .equ        GPIO_ADDR,	0x3F200000  @ GPIO_Base for RPi 3 
 
-.equ        PERIOD,     1024            @ Total cycle time in microseconds (1ms)
-.equ        ON_TIME,    500             @ Time for which LED is on in microseconds
-.equ        OFF_TIME,   (PERIOD - ON_TIME) @ The assembler calculates this
+.equ        PERIOD,                1024            @ Total cycle time in microseconds (1ms)
+.equ        ON_TIME_ONE,           338             @ ! MUST BE THE SMALLER WAIT TIME
+.equ        ON_TIME_TWO_CHOICE,    676             @ Time for which LED is on in microseconds
+
+.equ        ON_TIME_TWO,    (ON_TIME_TWO_CHOICE - ON_TIME_ONE)             @ Time for which LED is on in microseconds
+.equ        OFF_TIME,       (PERIOD - ON_TIME_TWO_CHOICE) @ The assembler calculates this
 
 .text
 .include "Hardware2.s"           @ open, map, unmap and close functions
@@ -44,12 +48,18 @@ main:
 		CMP		R0, #0				@ If return value ... 
 		BLT		exit				@	<0 (error) then exit
 
+                MOV		R0, #GERT24			@ Pin number
+		MOV		R1, #1				@ Code for output
+		BL		set_pin_function	@ Set pin to output
+		CMP		R0, #0				@ If return value ... 
+		BLT		exit				@	<0 (error) then exit
+
                 MOV		R0, #GERT22			@ Pin number
                 MOV 	        R1, #GPSET0		    @ Set (turn on LED)
                 BL		set_pin_value	    @ Turn on LED
 
                 MOV             R4, #10000			        @ 10000 seems reasonable amount of blinks
-                BL              blink_loop			@ Blink the LED a few times
+                BL              start_loop			@ Blink the LED a few times
 
 exit:
                 BL              unmap_io		    @ Unmap
@@ -64,14 +74,25 @@ STMFD        SP!, {R0, R1, R4, LR}	@ Save registers that will be used in blink_l
 
 blink_loop:
 MOV		R0, #GERT23			@ Pin number
-MOV 	        R1, #GPCLR0		    @ Set (turn off LED)
+MOV 	        R1, #GPSET0		    @ Set (turn off LED)
 BL		set_pin_value	    @ Turn on LED
 
-LDR             R0, =ON_TIME			@ delay in ms
+LDR             R0, =ON_TIME_TWO			@ delay in ms
+BL              wait_micro
+
+MOV		R0, #GERT24			@ Pin number
+MOV 	        R1, #GPSET0		    @ Set (turn off LED)
+BL		set_pin_value	    @ Turn on LED
+
+LDR             R0, =ON_TIME_ONE			@ delay in ms
 BL              wait_micro
 
 MOV		R0, #GERT23			@ Pin number
-MOV 	        R1, #GPSET0		    @ Set (turn on LED)
+MOV 	        R1, #GPCLR0		    @ Set (turn on LED)
+BL		set_pin_value	    @ Turn on LED
+
+MOV		R0, #GERT24			@ Pin number
+MOV 	        R1, #GPCLR0		    @ Set (turn on LED)
 BL		set_pin_value	    @ Turn on LED
 
 LDR             R0, =OFF_TIME			@ delay in ms
