@@ -37,7 +37,7 @@ main:
 		BLT		exit				@	<0 (error) then exit
 
 		MOV		R0, #GERT22			@ Pin number
-		MOV 	        R1, #GPSET0		    @ Set (turn on LED)
+		MOV 	        R1, #GPCLR0		    @ Set (turn on LED)
 		BL		set_pin_value	    @ Turn on LED
 exit:
 		LDR		R0, =gpiobase	    @ Load start unmap the memory
