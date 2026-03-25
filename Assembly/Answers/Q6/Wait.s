@@ -42,3 +42,37 @@ wait_clk:
 wait_exit:
         LDMFD   SP!, {R2-R5,LR}
         MOV     PC, LR
+
+@@@@@ wait microsecond: wait for R0 microseconds.
+@ Arguments:
+@	R0: number of microseconds
+@ Returns:
+@   None
+wait_micro:
+        STMFD	SP!, {R2-R5,LR}
+        CMP	    R0, #0
+        BLE	    wait_micro_exit	        @ Don't wait zero or negative time.
+        LDR	    R3, =clockbase		@ Load clockbase address
+        LDR	    R3, [R3]	        @ Load clockbase value
+        LDR	    R2, [R3,#4]         @ Read current CLO value
+        SUB	    R5, R2, #1	        @ Save current CLO - 1
+        ADDS    R4, R2, R0	        @ Add number of microseconds
+        BCC	    wait_micro_clk	        @ No carry, skip waiting for rollover.
+wait_micro_rollover:
+        LDR	    R2, [R3,#4]
+        CMP	    R2, R5		        @ Compare current to past time
+        BHI	wait_micro_rollover	        @ If higher/same, wait some more
+        @ special condition:
+        @ R4 = 2^32-N and process is not active during N microseconds
+        @ overflow will happen while waiting
+        MOV	    R5, R2		        @ Save last CLO value
+wait_micro_clk:
+        LDR	    R2, [R3,#4]			@ Read current CLO value
+        CMP	    R5, R2				@ Compare current to past time
+        BHI	    wait_micro_exit	        @ If higher then exit
+        MOV	    R5, R2				@ Save last CLO value
+        CMP	    R4, R2				@ Compare to target time
+        BHI	    wait_micro_clk	        @ If higher, wait some more
+wait_micro_exit:
+        LDMFD   SP!, {R2-R5,LR}
+        MOV     PC, LR

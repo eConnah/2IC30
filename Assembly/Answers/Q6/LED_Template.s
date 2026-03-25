@@ -21,6 +21,10 @@
 .equ        GERT23,     23          @ RPi GPIO to gertboard mappings
 .equ        GPIO_ADDR,	0x3F200000  @ GPIO_Base for RPi 3 
 
+.equ        PERIOD,     1024            @ Total cycle time in microseconds (1ms)
+.equ        ON_TIME,    500             @ Time for which LED is on in microseconds
+.equ        OFF_TIME,   (PERIOD - ON_TIME) @ The assembler calculates this
+
 .text
 .include "Hardware2.s"           @ open, map, unmap and close functions
 .include "Wait.s"                @ wait function
@@ -40,8 +44,12 @@ main:
 		CMP		R0, #0				@ If return value ... 
 		BLT		exit				@	<0 (error) then exit
 
-                MOV             R4, #10			        @ it says 10 blinks
-                BL              start_loop			@ Blink the LED a few times
+                MOV		R0, #GERT22			@ Pin number
+                MOV 	        R1, #GPSET0		    @ Set (turn on LED)
+                BL		set_pin_value	    @ Turn on LED
+
+                MOV             R4, #10000			        @ 10000 seems reasonable amount of blinks
+                BL              blink_loop			@ Blink the LED a few times
 
 exit:
                 BL              unmap_io		    @ Unmap
@@ -55,27 +63,19 @@ start_loop:
 STMFD        SP!, {R0, R1, R4, LR}	@ Save registers that will be used in blink_loop
 
 blink_loop:
-MOV		R0, #GERT22			@ Pin number
-MOV 	        R1, #GPSET0		    @ Set (turn on LED)
-BL		set_pin_value	    @ Turn on LED
-
 MOV		R0, #GERT23			@ Pin number
 MOV 	        R1, #GPCLR0		    @ Set (turn off LED)
 BL		set_pin_value	    @ Turn on LED
 
-MOV             R0, #250			@ delay in ms
-BL              wait
-
-MOV		R0, #GERT22			@ Pin number
-MOV 	        R1, #GPCLR0		    @ Set (turn off LED)
-BL		set_pin_value	    @ Turn on LED
+LDR             R0, =ON_TIME			@ delay in ms
+BL              wait_micro
 
 MOV		R0, #GERT23			@ Pin number
 MOV 	        R1, #GPSET0		    @ Set (turn on LED)
 BL		set_pin_value	    @ Turn on LED
 
-MOV             R0, #250			@ delay in ms
-BL              wait
+LDR             R0, =OFF_TIME			@ delay in ms
+BL              wait_micro
 
 SUBS		R4, R4, #1		@ Decrement counter
 CMP             R4, #0			@ Compare counter to 0
