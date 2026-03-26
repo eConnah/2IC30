@@ -15,3 +15,8 @@ This repository contains course materials for 2IC30, focusing on computer archit
 RAM [ ΣA ] ← ΣW
 RA, CC ← RA(Abus) + RB(Bbus), ALU.cc
 ```
+
+## Contributors
+
+* **Connor Alecks** - *Backend & Nix* - [GitHub](https://github.com/econnah)
+* **Lukáš Hlaváč** - *Backend* - [GitHub](https://github.com/ccsio)
